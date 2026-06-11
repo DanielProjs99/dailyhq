@@ -1,10 +1,12 @@
-# CzekoLos 🍫🎡
+# Daily HQ 🎯
 
-Narzędzie na daily zespołu:
+Narzędzie na daily zespołu (dev / front / qa / pm):
 
-- **🎡 Koło prowadzącego** – w pełni losowo wybiera, kto prowadzi spotkanie.
-- **🍫 Licznik czekolad** – ile czekolad każdy „wisi” za spóźnienia (ręczne +/−).
-- **👥 Zespół** – dodawanie/usuwanie osób, oznaczanie kto bierze udział w losowaniu.
+- **🎡 Koło prowadzącego** – w pełni losowo wybiera, kto prowadzi spotkanie (konfetti, dźwięk, filtr po roli).
+- **🍫 Licznik czekolad** – ile czekolad każdy „wisi” za spóźnienia (ręczne +/−), ranking i eksport CSV/kopiowanie.
+- **✅ Obecność** – jednym klikiem oznaczasz kto jest dziś (pomijanie nieobecnych w losowaniu).
+- **⏱️ Timer daily** – odliczanie czasu spotkania (10/15/20 min).
+- **👥 Zespół** – dodawanie/usuwanie osób, role, historia prowadzących.
 
 Dane są **współdzielone na żywo** (WebSocket) – wszyscy widzą ten sam stan.
 Bez logowania, baza w pliku SQLite (wbudowany `node:sqlite`, zero kompilacji).
@@ -18,7 +20,6 @@ Bez logowania, baza w pliku SQLite (wbudowany `node:sqlite`, zero kompilacji).
 
 ```bash
 npm run install:all          # instaluje zależności server + client
-# w dwóch terminalach albo:
 npm run dev                  # backend :3000 + frontend :5173
 ```
 
@@ -38,7 +39,7 @@ Aplikacja działa wtedy na jednym porcie (domyślnie `3000`).
 
 ```bash
 npm i -g pm2
-pm2 start server/src/index.js --name czekolos --env PORT=3000
+pm2 start server/src/index.js --name daily-hq --env PORT=3000
 pm2 save && pm2 startup       # autostart po restarcie serwera
 ```
 
@@ -56,4 +57,4 @@ location / {
 
 ## Dane
 
-Baza: `server/data/czekolos.db`. Backup = skopiowanie tego pliku.
+Baza: `server/data/czekolos.db` (nie jest w repo). Backup = skopiowanie tego pliku.
