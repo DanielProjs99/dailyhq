@@ -68,3 +68,16 @@ location / {
 ## Dane
 
 Baza: `server/data/czekolos.db` (nie jest w repo). Backup = skopiowanie tego pliku.
+
+Ścieżkę katalogu z bazą można zmienić zmienną `DATA_DIR` (np. na trwały dysk hostingu):
+
+```bash
+DATA_DIR=/var/data npm start
+```
+
+### Render: trwałość danych
+
+System plików instancji Render jest **ulotny** – przy każdym deployu/restarcie kontener
+startuje od zera, więc baza w katalogu aplikacji znika. Aby dane przetrwały, `render.yaml`
+montuje **trwały dysk** pod `/var/data` i ustawia `DATA_DIR=/var/data`. Trwały dysk wymaga
+planu płatnego (min. Starter) – na planie free dane nadal będą się kasować.

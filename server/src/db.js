@@ -4,7 +4,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dataDir = join(__dirname, '..', 'data');
+// Na Renderze (i innych hostingach) wskaż DATA_DIR na trwały dysk,
+// np. /var/data – inaczej baza znika przy każdym deployu/restarcie.
+const dataDir = process.env.DATA_DIR || join(__dirname, '..', 'data');
 mkdirSync(dataDir, { recursive: true });
 
 const db = new DatabaseSync(join(dataDir, 'czekolos.db'));

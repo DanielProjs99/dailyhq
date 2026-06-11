@@ -1,0 +1,10 @@
+node_modules
+**/node_modules
+client/dist
+server/data
+*.log
+.DS_Store
+.git
+.gitignore
+fly.toml
+render.yaml

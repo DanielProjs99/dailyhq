@@ -1,16 +1,22 @@
-# Blueprint dla Render – darmowy web service (Node + WebSocket).
+# Blueprint dla Render – web service (Node + WebSocket) z trwałym dyskiem.
 # Deploy: na render.com → New → Blueprint → wskaż to repo.
-# Uwaga: na planie free dysk jest ulotny, więc baza SQLite kasuje się
-# przy restarcie/redeployu (do testów OK; do trwałych danych użyj Fly.io z wolumenem).
+#
+# WAŻNE: trwały dysk wymaga planu płatnego (min. Starter). Na planie free
+# dysk jest ulotny i baza SQLite kasuje się przy każdym deployu/restarcie.
 services:
   - type: web
     name: dailyhq
     runtime: node
-    plan: free
+    plan: starter
     branch: main
     buildCommand: npm run install:all && npm run build
     startCommand: npm start
     healthCheckPath: /
+    disk:
+      # Trwały wolumen – przeżywa deploye i restarty
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       # node:sqlite wymaga Node >= 22.5
       - key: NODE_VERSION
@@ -18,3 +24,6 @@ services:
       # Wspólne hasło dostępu do aplikacji – ustaw w panelu Render
       - key: APP_PASSWORD
         sync: false
+      # Baza SQLite na trwałym dysku (zgodne z mountPath powyżej)
+      - key: DATA_DIR
+        value: /var/data

@@ -74,9 +74,20 @@ export default function Wheel({
   const [winnerId, setWinnerId] = useState(null);
   const lastSpinAt = useRef(0);
 
+  // Lista „Ostatnio" – wstrzymana, dopóki koło się kręci, żeby zwycięzca
+  // nie pojawił się tam przed zatrzymaniem animacji.
+  const spinningRef = useRef(false);
+  const latestRecent = useRef(recent);
+  const [displayRecent, setDisplayRecent] = useState(recent);
+
   useEffect(() => {
     drawWheel(canvasRef.current, members);
   }, [members]);
+
+  useEffect(() => {
+    latestRecent.current = recent;
+    if (!spinningRef.current) setDisplayRecent(recent);
+  }, [recent]);
 
   useEffect(() => {
     if (!spinEvent || spinEvent.at === lastSpinAt.current) return;
@@ -85,6 +96,7 @@ export default function Wheel({
     const idx = members.findIndex((m) => m.id === spinEvent.winnerId);
     if (idx < 0) return;
 
+    spinningRef.current = true;
     setWinnerId(null);
     setSpinning(true);
     const ticks = scheduleTicks();
@@ -104,7 +116,9 @@ export default function Wheel({
   function handleEnd() {
     if (!spinning) return;
     setSpinning(false);
+    spinningRef.current = false;
     setWinnerId(spinEvent?.winnerId ?? null);
+    setDisplayRecent(latestRecent.current); // dopiero teraz pokaż zwycięzcę w „Ostatnio"
     sound.fanfare();
     confetti({ particleCount: 140, spread: 75, origin: { y: 0.4 } });
   }
@@ -168,10 +182,10 @@ export default function Wheel({
         </div>
       )}
 
-      {recent.length > 0 && (
+      {displayRecent.length > 0 && (
         <div className="recent">
           <span className="recent-label">Ostatnio:</span>
-          {recent.slice(0, 5).map((r, i) => (
+          {displayRecent.slice(0, 5).map((r, i) => (
             <span key={i} className="recent-chip">
               {roleIcon(r.role)} {r.name}
             </span>
