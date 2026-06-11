@@ -44,8 +44,6 @@ export default function App() {
     setAuthed(false);
   }
 
-  if (!authed) return <Login onSuccess={() => setAuthed(true)} />;
-
   // uczestnicy losowania: obecni + dopasowani do filtra roli
   const participants = members.filter(
     (m) => m.active && (roleFilter === 'all' || m.role === roleFilter),
@@ -76,6 +74,9 @@ export default function App() {
     sound.setMuted(m);
     setMuted(m);
   }
+
+  // Wszystkie hooki muszą być wywołane przed tym warunkiem (zasady hooków Reacta).
+  if (!authed) return <Login onSuccess={() => setAuthed(true)} />;
 
   return (
     <div className="app">
