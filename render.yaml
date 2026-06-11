@@ -1,0 +1,17 @@
+# Blueprint dla Render – darmowy web service (Node + WebSocket).
+# Deploy: na render.com → New → Blueprint → wskaż to repo.
+# Uwaga: na planie free dysk jest ulotny, więc baza SQLite kasuje się
+# przy restarcie/redeployu (do testów OK; do trwałych danych użyj Fly.io z wolumenem).
+services:
+  - type: web
+    name: dailyhq
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm run install:all && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      # node:sqlite wymaga Node >= 22.5
+      - key: NODE_VERSION
+        value: 22.11.0

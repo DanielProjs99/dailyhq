@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- koło fortuny: 6 kolorowych segmentów (paleta Daily HQ) -->
+  <g>
+    <path d="M32 32 L32 4 A28 28 0 0 1 56.25 18 Z" fill="#FFC700"/>
+    <path d="M32 32 L56.25 18 A28 28 0 0 1 56.25 46 Z" fill="#FF8A3D"/>
+    <path d="M32 32 L56.25 46 A28 28 0 0 1 32 60 Z" fill="#E84855"/>
+    <path d="M32 32 L32 60 A28 28 0 0 1 7.75 46 Z" fill="#7B2D8E"/>
+    <path d="M32 32 L7.75 46 A28 28 0 0 1 7.75 18 Z" fill="#2E86AB"/>
+    <path d="M32 32 L7.75 18 A28 28 0 0 1 32 4 Z" fill="#3DBE8B"/>
+  </g>
+  <!-- obwódka koła -->
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#1a1a1a" stroke-opacity="0.12" stroke-width="2"/>
+  <!-- środek -->
+  <circle cx="32" cy="32" r="6.5" fill="#fff" stroke="#FFC700" stroke-width="3"/>
+  <!-- wskaźnik -->
+  <path d="M25 1 L39 1 L32 13 Z" fill="#1a1a1a"/>
+</svg>
