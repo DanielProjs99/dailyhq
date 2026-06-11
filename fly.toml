@@ -1,24 +1,23 @@
-# Konfiguracja Fly.io dla Daily HQ (Node + WebSocket + trwały wolumen).
-# Deploy: fly deploy   |   przez GitHub: push na main i retry deploya.
-app = "dailyhq"
-primary_region = "waw"
+# fly.toml app configuration file generated for dailyhq on 2026-06-11T16:13:42Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'dailyhq'
+primary_region = 'arn'
 
 [build]
 
-[env]
-  PORT = "3000"
-  # Baza SQLite na trwałym wolumenie (db.js czyta DATA_DIR)
-  DATA_DIR = "/data"
-
 [http_service]
-  internal_port = 3000
+  internal_port = 8080
   force_https = true
-  # Jedna maszyna trzymająca wolumen; usypianie przy bezczynności OK – dane są na dysku.
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
+  processes = ['app']
 
-# Trwały dysk – przeżywa deploye i restarty (tu mieszka czekolos.db)
-[mounts]
-  source = "data"
-  destination = "/data"
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256

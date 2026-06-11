@@ -1,32 +1,42 @@
 # syntax = docker/dockerfile:1
 
-# Node 22.x – wymagane przez node:sqlite (start z flagą --experimental-sqlite).
-ARG NODE_VERSION=22
-FROM node:${NODE_VERSION}-slim AS build
+# Adjust NODE_VERSION as desired
+ARG NODE_VERSION=22.5
+FROM node:${NODE_VERSION}-slim AS base
 
+LABEL fly_launch_runtime="Node.js"
+
+# Node.js app lives here
 WORKDIR /app
 
-# Najpierw manifesty – lepszy cache warstw instalacji zależności.
+# Set production environment
+ENV NODE_ENV="production"
+
+
+# Throw-away build stage to reduce size of final image
+FROM base AS build
+
+# Install packages needed to build node modules
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
+
+# Install node modules
 COPY package.json ./
-COPY server/package.json ./server/
-COPY client/package.json ./client/
+RUN npm install
 
-# Instaluje zależności server + client (z devDependencies klienta – vite jest tu).
-# UWAGA: w stage'u build NIE ustawiamy NODE_ENV=production, żeby devDeps się zainstalowały.
-RUN npm run install:all
-
-# Reszta kodu i build frontendu do client/dist
+# Copy application code
 COPY . .
-RUN npm run build --prefix client
 
-# ── Obraz finalny ─────────────────────────────────────────
-FROM node:${NODE_VERSION}-slim
+# Build application
+RUN npm run build
 
-ENV NODE_ENV=production
-WORKDIR /app
 
-# Gotowa aplikacja wraz z node_modules serwera i zbudowanym frontendem
+# Final stage for app image
+FROM base
+
+# Copy built application
 COPY --from=build /app /app
 
+# Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD [ "npm", "run", "start" ]
