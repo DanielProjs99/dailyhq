@@ -9,7 +9,17 @@ Narzędzie na daily zespołu (dev / front / qa / pm):
 - **👥 Zespół** – dodawanie/usuwanie osób, role, historia prowadzących.
 
 Dane są **współdzielone na żywo** (WebSocket) – wszyscy widzą ten sam stan.
-Bez logowania, baza w pliku SQLite (wbudowany `node:sqlite`, zero kompilacji).
+Dostęp chroni **wspólne hasło zespołu**, baza w pliku SQLite (wbudowany `node:sqlite`, zero kompilacji).
+
+## Hasło dostępu
+
+Aplikacja jest za jednym wspólnym hasłem. Ustaw je zmienną środowiskową `APP_PASSWORD`
+(domyślnie `daily` – zmień przed wystawieniem na świat). Token logowania to pochodna
+hasła (SHA-256), trzymana w `localStorage`; chroni zarówno REST API, jak i WebSocket.
+
+```bash
+APP_PASSWORD="twoje-haslo" npm start
+```
 
 ## Stack
 

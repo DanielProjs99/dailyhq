@@ -2,6 +2,7 @@ import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { existsSync } from 'node:fs';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { queries } from './db.js';
@@ -9,11 +10,40 @@ import { queries } from './db.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 
+// ── Wspólne hasło dostępu ─────────────────────────────────
+// Ustaw APP_PASSWORD w środowisku (np. na Render). Domyślne tylko do dev.
+const APP_PASSWORD = process.env.APP_PASSWORD || 'daily';
+// Token wydawany po zalogowaniu – pochodna hasła, więc samo hasło nie krąży po sieci.
+const AUTH_TOKEN = createHash('sha256').update(APP_PASSWORD).digest('hex');
+
+function safeEqual(a, b) {
+  const bufA = Buffer.from(String(a));
+  const bufB = Buffer.from(String(b));
+  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+}
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: '*' } });
 
 app.use(express.json());
+
+// ── Logowanie i ochrona API ───────────────────────────────
+app.post('/api/login', (req, res) => {
+  const password = req.body?.password || '';
+  if (!safeEqual(password, APP_PASSWORD))
+    return res.status(401).json({ error: 'Nieprawidłowe hasło' });
+  res.json({ token: AUTH_TOKEN });
+});
+
+// Middleware: każde /api/* (poza /api/login) wymaga ważnego tokenu.
+app.use('/api', (req, res, next) => {
+  if (req.path === '/login') return next();
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  if (!safeEqual(token, AUTH_TOKEN))
+    return res.status(401).json({ error: 'Brak autoryzacji' });
+  next();
+});
 
 // Historia ostatnich prowadzących (w pamięci – zerowana przy restarcie serwera)
 const recentLeaders = [];
@@ -78,6 +108,12 @@ if (existsSync(clientDist)) {
 }
 
 // ── WebSocket ─────────────────────────────────────────────
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!safeEqual(token, AUTH_TOKEN)) return next(new Error('unauthorized'));
+  next();
+});
+
 io.on('connection', (socket) => {
   socket.emit('state', queries.all());
   socket.emit('recent', recentLeaders);

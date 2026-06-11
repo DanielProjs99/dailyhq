@@ -15,3 +15,6 @@ services:
       # node:sqlite wymaga Node >= 22.5
       - key: NODE_VERSION
         value: 22.11.0
+      # Wspólne hasło dostępu do aplikacji – ustaw w panelu Render
+      - key: APP_PASSWORD
+        sync: false

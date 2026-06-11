@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { socket, api } from './api.js';
+import { socket, api, auth, connectSocket } from './api.js';
 import { sound } from './sound.js';
+import Login from './components/Login.jsx';
 import Wheel from './components/Wheel.jsx';
 import Chocolates from './components/Chocolates.jsx';
 import TeamManager from './components/TeamManager.jsx';
@@ -8,6 +9,7 @@ import AttendanceBar from './components/AttendanceBar.jsx';
 import Timer from './components/Timer.jsx';
 
 export default function App() {
+  const [authed, setAuthed] = useState(!!auth.get());
   const [members, setMembers] = useState([]);
   const [spinEvent, setSpinEvent] = useState(null);
   const [recent, setRecent] = useState([]);
@@ -16,13 +18,33 @@ export default function App() {
   const [muted, setMuted] = useState(sound.isMuted());
 
   useEffect(() => {
+    if (!authed) return;
     socket.on('connect', () => setConnected(true));
     socket.on('disconnect', () => setConnected(false));
+    socket.on('connect_error', (err) => {
+      if (err.message === 'unauthorized') logout();
+    });
     socket.on('state', setMembers);
     socket.on('spin', setSpinEvent);
     socket.on('recent', setRecent);
+    connectSocket();
     return () => socket.off();
+  }, [authed]);
+
+  // Wylogowanie wymuszone przez serwer (401 na REST API)
+  useEffect(() => {
+    window.addEventListener('unauthorized', logout);
+    return () => window.removeEventListener('unauthorized', logout);
   }, []);
+
+  function logout() {
+    auth.clear();
+    socket.disconnect();
+    setConnected(false);
+    setAuthed(false);
+  }
+
+  if (!authed) return <Login onSuccess={() => setAuthed(true)} />;
 
   // uczestnicy losowania: obecni + dopasowani do filtra roli
   const participants = members.filter(
@@ -64,6 +86,9 @@ export default function App() {
         <div className="topbar-right">
           <button className="btn btn-mini" onClick={toggleMute}>
             {muted ? '🔇 dźwięk' : '🔊 dźwięk'}
+          </button>
+          <button className="btn btn-mini" onClick={logout}>
+            🔒 wyloguj
           </button>
           <span className={`status ${connected ? 'on' : 'off'}`}>
             {connected ? 'połączono' : 'offline'}
