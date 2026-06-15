@@ -23,7 +23,7 @@ APP_PASSWORD="twoje-haslo" npm start
 
 ## Stack
 
-- Backend: Node.js + Express + Socket.IO + `node:sqlite`
+- Backend: Node.js 24 + Express + Socket.IO + `node:sqlite`
 - Frontend: React + Vite
 
 ## Uruchomienie lokalne (dev)
@@ -81,6 +81,12 @@ System plików kontenera jest zwykle **ulotny** – przy każdym deployu/restarc
 od zera, więc baza w katalogu aplikacji znika. Aby dane przetrwały, podepnij **trwały
 wolumen** i ustaw `DATA_DIR` na jego ścieżkę (np. `/data`).
 
-Na **cyberFolks App Platform** wolumen tworzysz w zakładce *Volumes* projektu/aplikacji,
-a `DATA_DIR` ustawiasz w *Variables*. Obraz budowany jest z `Dockerfile` i uruchamiany
-w trybie *Container image*.
+Na **cyberFolks App Platform** aplikację stawiasz z repozytorium Git (preset **Node.js 24**) –
+platforma sama buduje obraz buildpackiem, `Dockerfile` nie jest używany (zostaje jako opcja dla
+innych hostingów / lokalnego dockera). Konfiguracja:
+
+- **Runtime**: Node.js, wersja `24` (lub `BP_NODE_VERSION=24.*`; spójne z `engines.node` i `.nvmrc`).
+- **Variables**: `BP_NODE_RUN_SCRIPTS=build` (uruchamia `npm run build` na etapie budowy),
+  `NODE_ENV=production`, `DATA_DIR=/data`, a hasło `APP_PASSWORD` jako *Secret variable*.
+- **Volumes**: utwórz wolumen z rozmiarem (np. `512Mi`) i zamontuj pod `/data` – inaczej baza
+  SQLite znika przy każdym deployu. Uwaga: SQLite nie nadaje się do `replicas ≥ 2`.
