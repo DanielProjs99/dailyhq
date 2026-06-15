@@ -4,13 +4,17 @@
 ARG NODE_VERSION=22.5
 FROM node:${NODE_VERSION}-slim AS base
 
-LABEL fly_launch_runtime="Node.js"
-
 # Node.js app lives here
 WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
+
+# libatomic1 jest wymagane przez Node (brakuje go w obrazie -slim),
+# inaczej: "node: error while loading shared libraries: libatomic.so.1"
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y libatomic1 && \
+    rm -rf /var/lib/apt/lists/*
 
 
 # Throw-away build stage to reduce size of final image
